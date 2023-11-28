@@ -1,9 +1,12 @@
 package com.qz.qqcommon;
 
 import java.io.Serializable;
-
+import java.io.Serializable;
 /**
  * 表示客户端和服务端通信时的消息对象
+ */
+/**
+ * 嗯嗯，对的对的
  */
 public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
