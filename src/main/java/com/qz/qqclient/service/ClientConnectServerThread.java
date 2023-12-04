@@ -25,7 +25,7 @@ public class ClientConnectServerThread extends Thread {
         while (true) {
 
             try {
-                System.out.println("客户端线程，等待从读取从服务器端发送的消息");
+                System.out.println("客户端线程，等待读取从服务器端发送的消息");
                 ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                 //如果服务器没有发送Message对象,线程会阻塞在这里
                 Message message = (Message) ois.readObject();
