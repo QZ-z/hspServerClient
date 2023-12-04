@@ -72,7 +72,9 @@ public class QQServer {
                 //创建一个Message对象，准备回复客户端
                 Message message = new Message();
                 //验证用户 方法
-                if (checkUser(u.getUserId(), u.getPasswd())) {//登录通过
+                boolean judge1 = checkUser(u.getUserId(), u.getPasswd());//验证账号密码是否正确
+                boolean judge2 = ManageClientThreads.getServerConnectClientThread(u.getUserId()) == null;//是否已经登录
+                if (judge1 && judge2) {//登录通过
                    message.setMesType(MessageType.MESSAGE_LOGIN_SUCCEED);
                    //将message对象回复客户端
                     oos.writeObject(message);
@@ -84,11 +86,16 @@ public class QQServer {
                     //把该线程对象，放入到一个集合中，进行管理.
                     ManageClientThreads.addClientThread(u.getUserId(), serverConnectClientThread);
 
-                } else { // 登录失败
+                } else if(!judge1){ // 登录失败
                     System.out.println("用户 id=" + u.getUserId() + " pwd=" + u.getPasswd() + " 验证失败");
                     message.setMesType(MessageType.MESSAGE_LOGIN_FAIL);
                     oos.writeObject(message);
                     //关闭socket
+                    socket.close();
+                }else{
+                    System.out.println(("用户 id=" + u.getUserId() + "已经登录"));
+                    message.setMesType(MessageType.MESSAGE_LOGIN_AGAIN);
+                    oos.writeObject(message);
                     socket.close();
                 }
             }

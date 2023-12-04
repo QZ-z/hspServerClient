@@ -49,8 +49,12 @@ public class UserClientService {
                 // 这里为了后面客户端的扩展，我们将线程放入到集合管理
                 ManageClientConnectServerThread.addClientConnectServerThread(userId, clientConnectServerThread);
                 b = true;
-            } else {
+            } else if(ms.getMesType().equals(MessageType.MESSAGE_LOGIN_FAIL)){
+                System.out.println("=====账号或密码错误=====");
                 // 如果登录失败, 我们就不能启动和服务器通信的线程, 关闭 socket
+                socket.close();
+            }else if(ms.getMesType().equals(MessageType.MESSAGE_LOGIN_AGAIN)){
+                System.out.println("=====请不要重复登录=====");
                 socket.close();
             }
         } catch (Exception e) {

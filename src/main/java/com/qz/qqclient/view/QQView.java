@@ -83,7 +83,7 @@ public class QQView {
                                 case "9":
                                     //调用方法，给服务器发送一个退出系统的message
                                     userClientService.logout();
-                                    loop = false;
+                                    loop = false;//不要也行
                                     break;
                             }
 
