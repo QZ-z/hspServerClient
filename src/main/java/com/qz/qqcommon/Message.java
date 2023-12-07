@@ -16,8 +16,17 @@ public class Message implements Serializable {
     //进行扩展 和文件相关的成员
     private byte[] fileBytes;
     private int fileLen = 0;
+    private String fileName;//文件的名称
     private String dest; //将文件传输到哪里
     private String src; //源文件路径
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
     public byte[] getFileBytes() {
         return fileBytes;

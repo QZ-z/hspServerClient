@@ -16,4 +16,8 @@ public interface MessageType {
     String MESSAGE_TO_ALL_MES = "7"; //群发消息报
     String MESSAGE_FILE_MES = "8"; //文件消息(发送文件)
     String MESSAGE_LOGIN_AGAIN = "9";//重复登录
+    String MESSAGE_ILLUSER = "10";//非法用户
+    String MESSAGE_OFF_LINE = "11";//离线消息包
+    String MESSAGE_SUCCESS_EXIT = "12";//服务器端已退出
+    String MESSAGE_OFFLINE_FILE = "13";//离线文件包
 }

@@ -4,6 +4,7 @@ import com.qz.qqcommon.Message;
 import com.qz.qqcommon.MessageType;
 
 import java.io.*;
+import java.util.Date;
 
 /**
  * 该类/对象完成 文件传输服务
@@ -25,7 +26,8 @@ public class FileClientService {
         message.setGetter(getterId);
         message.setSrc(src);
         message.setDest(dest);
-
+        message.setSendTime(new Date().toString());
+        message.setFileName(src.substring(src.lastIndexOf('\\')+1));
         //需要将文件读取
         FileInputStream fileInputStream = null;
         byte[] fileBytes = new byte[(int)new File(src).length()];

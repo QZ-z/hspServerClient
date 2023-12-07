@@ -1,16 +1,16 @@
 package com.qz.qqserver.service;
 
+import com.qz.qqcommon.File_map;
 import com.qz.qqcommon.Message;
 import com.qz.qqcommon.MessageType;
 import com.qz.qqcommon.User;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -25,6 +25,39 @@ public class QQServer {
     //ConcurrentHashMap 处理的线程安全,即线程同步处理, 在多线程情况下是安全
     private static ConcurrentHashMap<String, User> validUsers = new ConcurrentHashMap<>();
     //private static ConcurrentHashMap<String, ArrayList<Message>> offLineDb = new ConcurrentHashMap<>();
+
+    public static ConcurrentHashMap<String, User> getValidUsers(){return validUsers;}
+
+    private static ConcurrentHashMap<String, List<Message>> offlineMsg = new ConcurrentHashMap<>();
+
+    public static ConcurrentHashMap<String, List<Message>> getOfflineMsg(){ return offlineMsg;}
+
+    public static void setOfflineMsg(String userId, List<Message> msg_list){
+        if(offlineMsg.get(userId) == null){
+            //没有未处理的离线消息
+            offlineMsg.put(userId,msg_list);
+        }else{
+            //有未处理的离线消息
+            List<Message> old = offlineMsg.get(userId);
+            old.addAll(msg_list);
+        }
+    }
+
+    //离线文件集合，暂存到服务器中，保存在服务器中的文件路径和原文件名，格式：服务器路径，原文件名
+    private static ConcurrentHashMap<String, List<File_map>> offLineFile = new ConcurrentHashMap<>();
+
+    public static ConcurrentHashMap<String, List<File_map>> getOffLineFile(){return offLineFile;}
+
+    public static void setOffLineFile(String userId, List<File_map> offLineFile_map){
+        if(offLineFile.get(userId) == null){
+            offLineFile.put(userId,offLineFile_map);
+        }else {
+            List<File_map> old = offLineFile.get(userId);
+            old.addAll(offLineFile_map);
+        }
+    }
+
+
 
     static { //在静态代码块，初始化 validUsers
 
@@ -75,9 +108,62 @@ public class QQServer {
                 boolean judge1 = checkUser(u.getUserId(), u.getPasswd());//验证账号密码是否正确
                 boolean judge2 = ManageClientThreads.getServerConnectClientThread(u.getUserId()) == null;//是否已经登录
                 if (judge1 && judge2) {//登录通过
-                   message.setMesType(MessageType.MESSAGE_LOGIN_SUCCEED);
-                   //将message对象回复客户端
+                    message.setMesType(MessageType.MESSAGE_LOGIN_SUCCEED);
+                    //将message对象回复客户端
                     oos.writeObject(message);
+
+                    //查看是否有该用户的离线消息，如果有，通过message推送
+                    if(offlineMsg.get(u.getUserId()) != null){
+                        List<Message> offLineMsgs = offlineMsg.get(u.getUserId());
+                        for(Message msg : offLineMsgs){
+                            oos = new ObjectOutputStream(socket.getOutputStream());
+
+                            oos.writeObject(msg);
+                        }
+                        //传完了在删除离线消息
+                        offlineMsg.remove(u.getUserId());
+                        System.out.println(u.getUserId()+"上线服务器转发完所有离线消息");
+                    }
+
+                    //查看是否有该用户的离线文件，如果有，推送
+                    if(offLineFile.get(u.getUserId()) != null){
+                        List<File_map> offLineFiles = offLineFile.get(u.getUserId());
+                        for(File_map fm:offLineFiles){
+                            FileInputStream fileInputStream = null;
+                            File now_file = new File(fm.getRootPath()+File.separator+fm.getGenName());
+                            byte[] fileBytes = new byte[(int)now_file.length()];
+                            fileInputStream = new FileInputStream(fm.getRootPath()+File.separator+fm.getGenName());
+                            fileInputStream.read(fileBytes);//读入服务器中的离线文件
+
+                            Message offFileMsg = new Message();
+                            //将文件对应的字节数组设置message
+                            offFileMsg.setFileBytes(fileBytes);
+                            offFileMsg.setMesType(MessageType.MESSAGE_OFFLINE_FILE);
+                            offFileMsg.setSender(fm.getSender());
+                            offFileMsg.setGetter(fm.getGetter());
+                            offFileMsg.setFileName(fm.getOriName());
+                            offFileMsg.setSendTime(fm.getTime());
+                            offFileMsg.setDest(fm.getDstPath());
+
+
+                            oos = new ObjectOutputStream(socket.getOutputStream());
+                            oos.writeObject(offFileMsg);
+
+                            fileInputStream.close();
+                            //删除服务器端文件
+                            boolean delete = now_file.delete();
+                            if(delete){
+                                System.out.println("服务器端临时离线文件删除成功");
+                            }else{
+                                System.out.println("服务器端临时离线文件删除失败");
+                            }
+                        }
+                        //删除映射信息
+                        offLineFile.remove(u.getUserId());
+                        System.out.println("服务器转发完用户"+u.getUserId()+"的所有的离线文件");
+
+                    }
+
                     //创建一个线程，和客户端保持通信, 该线程需要持有socket对象
                     ServerConnectClientThread serverConnectClientThread =
                             new ServerConnectClientThread(socket, u.getUserId());

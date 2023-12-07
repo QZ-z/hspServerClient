@@ -1,12 +1,11 @@
 package com.qz.qqclient.service;
 
+import com.qz.qqclient.utils.Utility;
+import com.qz.qqclient.view.QQView;
 import com.qz.qqcommon.Message;
 import com.qz.qqcommon.MessageType;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.net.Socket;
 
 public class ClientConnectServerThread extends Thread {
@@ -41,25 +40,64 @@ public class ClientConnectServerThread extends Thread {
                         System.out.println("用户: " + onlineUsers[i]);
                     }
 
-                } else if (message.getMesType().equals(MessageType.MESSAGE_COMM_MES)) {//普通的聊天消息
+                }
+                else if (message.getMesType().equals(MessageType.MESSAGE_COMM_MES)) {//普通的聊天消息
                     //把从服务器转发的消息，显示到控制台即可
                     System.out.println("\n" + message.getSender()
                             + " 对 " + message.getGetter() + " 说: " + message.getContent());
-                } else if (message.getMesType().equals(MessageType.MESSAGE_TO_ALL_MES)) {
+                }
+                else if (message.getMesType().equals(MessageType.MESSAGE_TO_ALL_MES)) {
                     //显示在客户端的控制台
                     System.out.println("\n" + message.getSender() + " 对大家说: " + message.getContent());
-                } else if (message.getMesType().equals(MessageType.MESSAGE_FILE_MES)) {//如果是文件消息
-                    //让用户指定保存路径。。。
-                    System.out.println("\n" + message.getSender() + " 给 " + message.getGetter()
-                            + " 发文件: " + message.getSrc() + " 到我的电脑的目录 " + message.getDest());
-
+                }
+                else if (message.getMesType().equals(MessageType.MESSAGE_FILE_MES)) {//如果是文件消息
+                    //让用户指定保存路径。。。，额，没实现
+//                    synchronized (Utility.getScanner()){
+//                        System.out.println("\n" + message.getSender() + " 给 " + message.getGetter()
+//                                + " 发文件: " + message.getSrc() + " 到我的电脑的目录 " + message.getDest());
+//                        System.out.println("请指定接收位置(形式 d:\\yy.jpg)，输入1表示默认");
+//                        QQView.setMenuScan(false);
+//                        String path = Utility.readString(50,"1");
+//                        QQView.setMenuScan(true);
+//                        if(path.equals("1")){
+//                            //取出message的文件字节数组，通过文件输出流写出到磁盘
+//                            FileOutputStream fileOutputStream = new FileOutputStream(message.getDest(), true);
+//                            fileOutputStream.write(message.getFileBytes());
+//                            fileOutputStream.close();
+//                            System.out.println("\n 保存文件成功~");
+//                        }else{
+//                            FileOutputStream fileOutputStream = new FileOutputStream(path, true);
+//                            fileOutputStream.write(message.getFileBytes());
+//                            fileOutputStream.close();
+//                            System.out.println("\n 保存文件成功~");
+//                        }
+//                    }
                     //取出message的文件字节数组，通过文件输出流写出到磁盘
                     FileOutputStream fileOutputStream = new FileOutputStream(message.getDest(), true);
                     fileOutputStream.write(message.getFileBytes());
                     fileOutputStream.close();
                     System.out.println("\n 保存文件成功~");
-
-                } else {
+                }
+                else if (message.getMesType().equals(MessageType.MESSAGE_ILLUSER)) {//与非法用户通信
+                    System.out.println("\n试图与非法用户通信");
+                }
+                else if (message.getMesType().equals(MessageType.MESSAGE_OFF_LINE)) {//有离线消息待接收
+                    System.out.println("\n用户"+message.getSender()+"在"+message.getSendTime()+
+                            "发送离线消息："+message.getContent());
+                }
+                else if (message.getMesType().equals(MessageType.MESSAGE_OFFLINE_FILE)) {
+                    //有离线文件待接收
+                    System.out.println("\n"+message.getSender()+"在"+message.getSendTime()+"发送离线文件"+message.getFileName()
+                    +"指定保存路径为"+message.getDest());
+                    FileOutputStream fileOutputStream = new FileOutputStream(message.getDest(),true);
+                    fileOutputStream.write(message.getFileBytes());
+                    fileOutputStream.close();
+                    System.out.println("离线文件接收完毕");
+                }
+                else if(message.getMesType().equals(MessageType.MESSAGE_SUCCESS_EXIT)){//成功在服务器注销
+                    break;
+                }
+                else {
                     System.out.println("是其他类型的message, 暂时不处理....");
                 }
 

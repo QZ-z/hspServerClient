@@ -45,6 +45,7 @@ public class QQView {
                         System.out.println("===========欢迎 (用户 " + userId + " 登录成功) ===========");
                         //进入到二级菜单
                         while (loop) {
+
                             System.out.println("\n=========网络通信系统二级菜单(用户 " + userId + " )=======");
                             System.out.println("\t\t 1 显示在线用户列表");
                             System.out.println("\t\t 2 群发消息");
@@ -52,6 +53,7 @@ public class QQView {
                             System.out.println("\t\t 4 发送文件");
                             System.out.println("\t\t 9 退出系统");
                             System.out.print("请输入你的选择: ");
+
                             key = Utility.readString(1);
                             switch (key) {
                                 case "1":
@@ -64,7 +66,7 @@ public class QQView {
                                     messageClientService.sendMessageToAll(s, userId);
                                     break;
                                 case "3":
-                                    System.out.print("请输入想聊天的用户号(在线): ");
+                                    System.out.print("请输入想聊天的用户号(在线或离线): ");
                                     String getterId = Utility.readString(50);
                                     System.out.print("请输入想说的话: ");
                                     String content = Utility.readString(100);
@@ -85,9 +87,8 @@ public class QQView {
                                     userClientService.logout();
                                     loop = false;//不要也行
                                     break;
+                                }
                             }
-
-                        }
                     } else { //登录服务器失败
                         System.out.println("=========登录失败=========");
                     }
@@ -100,4 +101,5 @@ public class QQView {
         }
 
     }
+
 }

@@ -6,8 +6,10 @@ package com.qz.qqserver.utils;
    处理各种情况的用户输入，并且能够按照程序员的需求，得到用户的控制台输入。
 */
 
-import java.util.Scanner;
+import org.example.Main;
 
+import java.util.Scanner;
+import java.util.UUID;
 /**
 
    
@@ -173,5 +175,12 @@ public class Utility {
         }
 
         return line;
+    }
+
+    public static String getRandomName(String fileName){
+        int index = fileName.lastIndexOf(".");
+        String houzhui = fileName.substring(index);//获取后缀名
+        String uuidFileName = UUID.randomUUID().toString().replace("-","")+houzhui;
+        return uuidFileName;
     }
 }
