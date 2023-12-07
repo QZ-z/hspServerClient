@@ -37,8 +37,13 @@ public class FileClientService {
             fileInputStream.read(fileBytes);//将src文件读入到程序的字节数组
             //将文件对应的字节数组设置message
             message.setFileBytes(fileBytes);
-        } catch (Exception e) {
+        }catch (FileNotFoundException e){
+            System.out.println("输入路径文件不存在");
+            return;
+        }
+        catch (Exception e) {
             e.printStackTrace();
+
         } finally {
             //关闭
             if(fileInputStream != null) {

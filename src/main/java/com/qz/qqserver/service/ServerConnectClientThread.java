@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -184,7 +185,14 @@ public class ServerConnectClientThread extends Thread {
                 else {
                     System.out.println("其他类型的message , 暂时不处理");
                 }
-            } catch (Exception e) {
+            }catch (SocketException e ){
+                //客户端意外关闭，java.net.SocketException: Connection reset
+                //做掉线处理
+                ManageClientThreads.removeServerConnectClientThread(userId);
+                System.out.println(userId+"意外掉线");
+                break;
+            }
+            catch (Exception e) {
                 e.printStackTrace();
             }
         }

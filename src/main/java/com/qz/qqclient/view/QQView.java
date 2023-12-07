@@ -74,7 +74,7 @@ public class QQView {
                                     messageClientService.sendMessageToOne(content, userId, getterId);
                                     break;
                                 case "4":
-                                    System.out.print("请输入你想把文件发送给的用户(在线用户): ");
+                                    System.out.print("请输入你想把文件发送给的用户(在线或离线): ");
                                     getterId = Utility.readString(50);
                                     System.out.print("请输入发送文件的路径(形式 d:\\xx.jpg)");
                                     String src = Utility.readString(100);
